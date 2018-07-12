@@ -1,0 +1,9 @@
+*.pyc
+venv/
+env/
+
+*~
+.idea/
+config.yaml
+sp.key
+sp.crt
