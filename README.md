@@ -64,7 +64,7 @@ Here is how:
     
 1.  Configure and Start Idp spid-testenv2
 
-    [Configure and intall spid-testenv2](https://github.com/italia/spid-testenv2#installazione)
+    [Configure and install spid-testenv2](https://github.com/italia/spid-testenv2#installazione)
     
 2.  Start the example Spid  Service Provider
     
