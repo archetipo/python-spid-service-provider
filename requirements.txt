@@ -19,7 +19,7 @@ Paste==2.0.3
 pycparser==2.18
 pycryptodomex==3.4.6
 pyOpenSSL==18.0.0
-pysaml2==4.5.0
+pysaml2==5.0.0
 python-dateutil==2.6.1
 pytz==2017.2
 repoze.who==2.3
