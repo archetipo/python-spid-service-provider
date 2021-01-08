@@ -1,0 +1,53 @@
+{
+  "strict": true,
+  "debug": true,
+  "sp": {
+    "entityId": "http://localhost:5000/metadata/",
+    "issuer": "http://localhost:5000/metadata/",
+    "assertionConsumerService": {
+      "url": "http://localhost:5000/acs",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+    },
+    "singleLogoutService": {
+      "url": "http://localhost:5000/sls",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "attributeConsumingService": {
+      "serviceName": "http://localhost:5000",
+      "serviceDescription": "Spid SP testenv",
+      "requestedAttributes": [
+        {
+          "name": "name",
+          "isRequired": true
+        },
+        {
+          "name": "familyName",
+          "isRequired": true
+        },
+        {
+          "name": "email",
+          "isRequired": true
+        },
+        {
+          "name": "spidCode",
+          "isRequired": true
+        }
+      ]
+    },
+    "NameIDFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+    "x509cert": "",
+    "privateKey": ""
+  },
+  "idp": {
+    "entityId": "http://localhost:8088",
+    "singleSignOnService": {
+      "url": "http://localhost:8088/sso",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "singleLogoutService": {
+      "url": "http://localhost:8088/slo",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "x509cert": "MIIC+zCCAeOgAwIBAgIUa5EmjdFXg4qPpKko0xccDS2jp9AwDQYJKoZIhvcNAQEL BQAwDTELMAkGA1UEBhMCSVQwHhcNMjEwMTA2MTkxMjU0WhcNMjEwMjA1MTkxMjU0 WjANMQswCQYDVQQGEwJJVDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB ANacc8EGu3gtZ91xbDuwKDi6e7WpKRl46GWZdRL31KLLV8w/Nxu3QxUZ2bPotpcP TZ89qRHuBRkrpPGAQyRE3fqNY9v5QYeWvXwov5i5XKnM9WuDpzNOcxFaPR7oOcOj G3DzekDO8RNP+eT9t97yYfkqhIT8cdtp1dbDi3GCJNCZSAgs/YNh0zkgcUPxoHRs CxxRXzlZAyIOeMFjE3chcgS4vzuBWYqfP2fFrtbSnY65PlhfTx2ShRFiJOWV3TUv 1v0W/IueYVTYC/IG98mecXuaGUYFXHbIbb/F9c70l7O58XvNK4uOpyryKHl66tHa dW9/HdH9WZbnCC0DNVvzCusCAwEAAaNTMFEwHQYDVR0OBBYEFEJGTcOcLdqzTttn M8KAXjcsOV4dMB8GA1UdIwQYMBaAFEJGTcOcLdqzTttnM8KAXjcsOV4dMA8GA1Ud EwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAH2Gp6qtU4ernmsgecBfI8n1 w4C7KqQZCIHcigGHusa/NZ/wceMYGXNlcrsLXn+BzCi4EkIMileuZXXDeIVyOc40 xtw8BR50jF7XQ0qq7bOL/ZsWpV1ZiZ6NpxAlmxZxtMyFDmwTWeejlbBwUPHWYezT ztXMrldHVfr2rsXsNdVEboeMJbXkpAlB8dfDXKZWsDIf6h+feaGWd4ZQKKajX8rS J95IdRNLaYSobkyOg3DwpKCk2nB6FZ1owZuI8Z38AgreJEw+RHmQDETeFGGg4FLn mDbI7jqYxy2azP4WMYzQzrV8Et9Jx2Dq2r85BIGEp9oG432QDchBnqCa6z73alY="
+  }
+}

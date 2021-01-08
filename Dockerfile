@@ -1,13 +1,34 @@
-FROM python:3.6
+FROM python:3.7-slim
 
-# Install xmlsec1
-RUN echo 'deb http://mirror.isoc.org.il/pub/ubuntu/ trusty main universe' >> /etc/apt/sources.list && \
-    apt-get update && \
-    apt-get -y --no-install-recommends install xmlsec1
+# Install prerequisites
+RUN apt-get update \
+    && apt-get install -y \
+        ca-certificates \
+        xmlsec1 \
+        libffi6 \
+        build-essential \
+        libpq-dev \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-COPY . /usr/src/app
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-CMD python app.py
+# We copy just the requirements.txt first to leverage Docker cache
+# (avoid rebuilding the requirements layer when application changes)
+COPY ./requirements.txt /app/requirements.txt
+WORKDIR /app
+RUN pip install -r requirements.txt
+
+# When started, the container checks for the required configuration files
+# and if it can't find them, it uses the example files to make the server
+# start.
+#
+# The example files won't be available if the user rebinds /app/conf,
+# so we make a copy somewhere else.
+
+# Copy the full application in a single layer
+COPY . /app
+
+EXPOSE 5000
+VOLUME /app
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["python", "app.py"]

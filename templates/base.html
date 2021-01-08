@@ -3,63 +3,79 @@
 {% block title %}{{ application_name }}{% endblock %}
 {% block body_attribs %} style="padding-top: 60px"{% endblock %}
 {% block styles %}
-    {{super()}}
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/agid-spid-enter.min.css')}}">
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spid-sp-access-button.min.css') }}">
 {% endblock %}
 {% block navbar %}
     <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="{{ url_for('main_page') }}">{{ application_name }}</a>
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('main_page') }}">{{ application_name }}</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div><!--/.nav-collapse -->
         </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-	    {% if current_user.is_authenticated %}
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-	    {% endif %}
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
     </nav>
-  <div class="container">
-  {% endblock %}
-  {% block content %}
-  </div>
+    <div class="container">
+{% endblock %}
+{% block content %}
+    </div>
 {% endblock %}
 {% block scripts %}
-       {{super()}}
-        <script src="{{ url_for('static', filename='js/agid-spid-enter.min.js') }}" ></script>
-        <script type="text/javascript">
-/* eslint-disable indent */
-            window.agidSpidEnter.init({
-                language: 'it',
-                formActionUrl: '{{session.formActionUrl}}',
-                formSubmitMethod: 'POST',
-                providersPayload: {
-                    common: {
-                        providerHiddenName: 'name',
-                        atr: 2
-                    },
-                    aruba: {
-                        data: 'test',
-                        'a-nother': false
-                    },
-                    poste: {
-                        atr: 2
-                    },
-                    tim: {
-                        atr: 3,
-                        flag: true
-                    }
-                }
-            });
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/spid-sp-access-button.min.js') }}"></script>
+    <script>
 
-/* eslint-enable indent */
-        </script>
+        $(document).ready(function () {
+            var rootList = $("#spid-idp-list-small-root-post");
+            var idpList = rootList.children(".spid-idp-button-link");
+            var lnkList = rootList.children(".spid-idp-support-link");
+            while (idpList.length) {
+                rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+            }
+            rootList.append(lnkList);
+        });
+
+        $(document).ready(function () {
+            var rootList = $("#spid-idp-list-medium-root-post");
+            var idpList = rootList.children(".spid-idp-button-link");
+            var lnkList = rootList.children(".spid-idp-support-link");
+            while (idpList.length) {
+                rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+            }
+            rootList.append(lnkList);
+        });
+
+        $(document).ready(function () {
+            var rootList = $("#spid-idp-list-large-root-post");
+            var idpList = rootList.children(".spid-idp-button-link");
+            var lnkList = rootList.children(".spid-idp-support-link");
+            while (idpList.length) {
+                rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+            }
+            rootList.append(lnkList);
+        });
+
+        $(document).ready(function () {
+            var rootList = $("#spid-idp-list-xlarge-root-post");
+            var idpList = rootList.children(".spid-idp-button-link");
+            var lnkList = rootList.children(".spid-idp-support-link");
+            while (idpList.length) {
+                rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+            }
+            rootList.append(lnkList);
+        });
+    </script>
 {% endblock %}

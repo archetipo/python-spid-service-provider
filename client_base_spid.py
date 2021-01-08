@@ -226,7 +226,6 @@ class SpidBase(Base):
 
         if sign is None:
             sign = self.authn_requests_signed
-
         if (sign and self.sec.cert_handler.generate_cert()) or \
                         client_crt is not None:
             with self.lock:

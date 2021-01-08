@@ -10,15 +10,11 @@ import os
 import uuid
 
 import yaml
-from flask import (
-    Flask,
-    redirect,
-    render_template,
-    request,
-    Response,
-    session,
-    url_for,
-    send_from_directory, send_file)
+from flask import (Flask, request, render_template, redirect, session,
+                   make_response, send_file, url_for, jsonify)
+
+from urllib.parse import urlparse
+
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -29,147 +25,64 @@ from flask_login import (
     logout_user,
 )
 from flask_bootstrap import Bootstrap
-from saml2 import (
-    BINDING_HTTP_POST,
-    BINDING_HTTP_REDIRECT,
-    entity,
-    saml, valid_instance, samlp)
-from saml2.authn_context import requested_authn_context
-from saml2.metadata import metadata_tostring_fix, sign_entity_descriptor, entities_descriptor, entity_descriptor
-from saml2.pack import http_redirect_message
-from saml2.saml import NAME_FORMAT_BASIC, NAMEID_FORMAT_TRANSIENT, NameIDType_, Issuer
-# from saml2.client import Saml2Client
-from saml2.config import Config as Saml2Config, Config
-import requests
+from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
+from config import *
 
-from saml2.sigver import security_context
-from saml2.xmldsig import DIGEST_SHA256, SIG_RSA_SHA256, SIG_RSA_SHA1
+from saml import get_saml_auth, prepare_request
 
-from client_base_spid import Saml2ClientSpid
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+SPID_SP_PUBLIC_CERT = os.path.join(BASE_DIR, 'saml/certs/sp.crt')
+SPID_SP_PRIVATE_KEY = os.path.join(BASE_DIR, 'saml/certs/sp.key')
 
 metadata_url_for = {}
 
 app = Flask(__name__, static_folder='static')
+
 Bootstrap(app)
 app.secret_key = str(uuid.uuid4())  # Replace with your secret key
+
 login_manager = LoginManager()
 login_manager.init_app(app)
+
 logging.basicConfig(level=logging.DEBUG)
 spConfig = None
 user_store = {}
 
-def create_metadata_string(configfile, config=None, valid=None, cert=None,
-                           keyfile=None, mid=None, name=None, sign=None):
-    valid_for = 0
-    nspair = {"xs": "http://www.w3.org/2001/XMLSchema"}
+app.config['SAML_PATH'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'saml')
 
-    if valid:
-        valid_for = int(valid)  # Hours
+ATTRIBUTES_MAP = {
+    'familyName': 'last_name',
+    'name': 'first_name'
+}
 
-    eds = []
-    if config is None:
-        if configfile.endswith(".py"):
-            configfile = configfile[:-3]
-        config = Config().load_file(configfile, metadata_construction=True)
-    eds.append(entity_descriptor(config))
-
-    conf = Config()
-    conf.key_file = config.key_file or keyfile
-    conf.cert_file = config.cert_file or cert
-    conf.debug = 1
-    conf.xmlsec_binary = config.xmlsec_binary
-    secc = security_context(conf)
-
-    if mid:
-        eid, xmldoc = entities_descriptor(eds, valid_for, name, mid,
-                                          sign, secc)
-    else:
-        eid = eds[0]
-        if sign:
-            eid, xmldoc = sign_entity_descriptor(eid, mid, secc)
-        else:
-            xmldoc = None
-
-    valid_instance(eid)
-    return metadata_tostring_fix(eid, nspair, xmldoc)
+def init_saml_auth(request, idp):
+    local_config = None
+    if not idp or 'test' in idp:
+        idp = ""
+        local_config = app.config['SAML_PATH']
+    auth = get_saml_auth(request, idp, local_config_path=local_config)
+    return auth
 
 
-def saml_client_for(idp_name=None):
-    '''
-    Given the name of an IdP, return a configuation.
-    The configuration is a hash for use by saml2.config.Config
-    '''
+def process_user(attributes):
+    attrs = {}
+    try:
+        for attr in attributes:
+            if attr in REQUESTED_ATTRIBUTES:
+                key = ATTRIBUTES_MAP.get(attr, attr)
+                attrs[key] = attributes[attr][0]
+        username = attr['name']
+        if username not in user_store:
+            user_store[username] = attrs.copy()
 
-    if idp_name not in metadata_url_for:
-        raise Exception("Settings for IDP '{}' not found".format(idp_name))
-    acs_url = url_for(
-        "idp_initiated",
-        idp_name=idp_name,
-        _external=True)
-    https_acs_url = url_for(
-        "idp_initiated",
-        idp_name=idp_name,
-        _external=True,
-        _scheme='https')
-
-    rv = requests.get(metadata_url_for[idp_name], verify=False)
-
-    settings = {
-        "entityid": config.get('hostname'),
-        # "name_id_format_allow_create": True,
-        "name": config.get('hostname'),
-        'metadata': {
-            'inline': [rv.text],
-        },
-        'service': {
-            'sp': {
-                'nameid_format': config.get('hostname'),
-                'endpoints': {
-                    "name": "Spid SP Testenv",
-                    "NameIDFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-                    "assertion_consumer_service": [
-                        (acs_url, BINDING_HTTP_REDIRECT),
-                        (acs_url, BINDING_HTTP_POST),
-                        (https_acs_url, BINDING_HTTP_REDIRECT),
-                        (https_acs_url, BINDING_HTTP_POST)
-                    ],
-
-                    "identifier": NAME_FORMAT_BASIC,
-                    "policy": {
-                        "default": {
-                            "name_form": NAME_FORMAT_BASIC,
-                        },
-                    },
-                    "name_id_format": [
-                        NAMEID_FORMAT_TRANSIENT,
-                    ]
-                },
-                "requested_attribute_name_format": NAME_FORMAT_BASIC,
-                "required_attributes": config.get('required_attributes'),
-                'allow_unsolicited': True,
-                # "name_id_format_allow_create": True,
-                'authn_requests_signed': True,
-                'logout_requests_signed': True,
-                'want_assertions_signed': True,
-                'want_response_signed': False,
-                'requested_authn_context': True
-            },
-        },
-        "key_file": config.get('key_file') or "",
-        "cert_file": config.get('cert_file') or "",
-        "organization": {
-            "display_name":  config.get('name'),
-            "name":  config.get('name'),
-            "url":  config.get('hostname'),
-        },
-    }
-
-    spConfig = Saml2Config()
-    spConfig.load(settings)
-    spConfig.allow_unknown_attributes = True
-    saml_client = Saml2ClientSpid(config=spConfig)
-    return saml_client
+        user = User(username)
+        session['saml_attributes'] = attrs
+        session[username] = True
+        login_user(user)
+        return user
+    except (KeyError, ValueError):
+        return
 
 
 class User(UserMixin):
@@ -192,157 +105,138 @@ def load_user(user_id):
     return User(user_id)
 
 
-@app.route("/")
-def main_page():
-    loginEp = "%s/%s" % (
-        config.get('hostname'),
-        config.get('endpoints').get('login')
-    )
-    session['idpName'] = config.get('test_idp_name')
-    session['formActionUrl'] = loginEp
-    return render_template('main_page.html', idp_dict=metadata_url_for)
-
-@app.route("/saml/login", methods=['POST'])
-def requstLogin():
-    return redirect("http://spid-sp-test:5000/saml/login/%s" % config.get('test_idp_name'))
-
-
-@app.route("/saml/sso/<idp_name>", methods=['POST'])
-def idp_initiated(idp_name):
-    saml_client = saml_client_for(idp_name)
-    authn_response = saml_client.parse_authn_request_response(
-        request.form['SAMLResponse'],
-        entity.BINDING_HTTP_POST)
-    authn_response.get_identity()
-    user_info = authn_response.get_subject()
-    username = user_info.text
-
-    # This is what as known as "Just In Time (JIT) provisioning".
-    # What that means is that, if a user in a SAML assertion
-    # isn't in the user store, we create that user first, then log them in
-    if username not in user_store:
-        user_store[username] = {
-            'first_name': authn_response.ava['name'][0],
-            'last_name': authn_response.ava['familyName'][0],
-            }
-    user = User(username)
-    session['saml_attributes'] = authn_response.ava
-    login_user(user)
-    url = url_for('user')
-    if 'RelayState' in request.form:
-        url = request.form['RelayState']
-    return redirect(url)
-
-
-@app.route("/saml/login/<idp_name>")
-def sp_initiated(idp_name):
-
-    app.logger.debug('Space key: {}'.format(""))
-    app.logger.debug('idp_name key: {}'.format(idp_name))
-    saml_client = saml_client_for(idp_name)
-
-    reqCtx = requested_authn_context(
-        [config.get('authn_request_level')], comparison='exact')
-
-    srvs = saml_client.metadata.single_sign_on_service(
-        config.get('test_idp_url'), BINDING_HTTP_POST)
-
-    reqid, req = saml_client.create_authn_request_spid(
-        srvs[0]["location"],
-        requested_authn_context=reqCtx,
-        issuer=Issuer(
-            name_qualifier=saml_client.config.getattr('organization').get('url'),
-            format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity",
-            text=config.get('hostname')
-        ),
-        sign=False, allow_create=None,
-        nsprefix={"saml": saml.NAMESPACE, "samlp": samlp.NAMESPACE}
-    )
-
-    app.logger.debug('reqid: {}'.format(reqid))
-    app.logger.debug('req: {}'.format(req))
-    redirect_url = None
-
-    # Select the IdP URL to send the AuthN request to
-
-    signer = saml_client.sec.sec_backend.get_signer(SIG_RSA_SHA256)
-    # signer = saml_client.sec.sec_backend.get_signer(SIG_RSA_SHA1)
-
-    info = http_redirect_message(
-        req, srvs[0]["location"], relay_state="user",
-        typ="SAMLRequest", sigalg=SIG_RSA_SHA256, signer=signer)
-
-    # info = http_redirect_message(
-    #     req, srvs[0]["location"], relay_state="RS",
-    #     typ="SAMLRequest")
-
-    app.logger.debug('info: {}'.format(info))
-    for key, value in info['headers']:
-        if key is 'Location':
-            redirect_url = value
-
-    response = redirect(redirect_url, code=302)
-    response.headers['Cache-Control'] = 'no-cache, no-store'
-    response.headers['Pragma'] = 'no-cache'
-    return response
-
-
 @app.route("/user")
-@login_required
 def user():
     return render_template('main_page.html', session=session)
 
+
+@app.route("/")
+def main_page():
+    loginEp = "/login?idp=test"
+    session['formActionUrl'] = loginEp
+    return render_template('main_page.html', idp_dict=metadata_url_for)
+
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    """
+        Handle login action ( SP -> IDP )
+    """
+    req = prepare_request(request)
+    if 'idp' in req['get_data']:
+        idp = req['get_data'].get('idp')
+        session['idp'] = idp
+        auth = init_saml_auth(req, idp)
+        args = []
+        if 'next' in req['get_data']:
+            args.append(req['get_data'].get('next'))
+        return redirect(auth.login(*args))
+    else:
+        return redirect("/")
+
+
+@app.route("/acs", methods=['POST'])
+def acs():
+    req = prepare_request(request)
+    # if "idp" in req.get('post_data'):
+    idp = None
+    auth = init_saml_auth(req, idp)
+    request_id = None
+    if 'AuthNRequestID' in session:
+        request_id = session['AuthNRequestID']
+    auth.process_response(request_id=request_id)
+    errors = auth.get_errors()
+    not_auth_warn = not auth.is_authenticated()
+    if len(errors) == 0:
+        if 'AuthNRequestID' in session:
+            del session['AuthNRequestID']
+        session['samlUserdata'] = auth.get_attributes()
+        session['samlNameId'] = auth.get_nameid()
+        session['samlNameIdFormat'] = auth.get_nameid_format()
+        session['samlNameIdNameQualifier'] = auth.get_nameid_nq()
+        session['samlNameIdSPNameQualifier'] = auth.get_nameid_spnq()
+        session['samlSessionIndex'] = auth.get_session_index()
+        self_url = OneLogin_Saml2_Utils.get_self_url(req)
+        if 'RelayState' in request.form and self_url != request.form['RelayState']:
+            return redirect(auth.redirect_to(request.form['RelayState']))
+    elif auth.get_settings().is_debug_active():
+        error_reason = auth.get_last_error_reason()
+        return make_response(error_reason)
+
+
+@app.route('/metadata')
+@app.route('/metadata/<idp_name>')
+def metadata(idp_name=None):
+    req = prepare_request(request)
+    auth = init_saml_auth(req, idp_name)
+    settings = auth.get_settings()
+    metadata = settings.get_sp_metadata()
+    errors = settings.validate_metadata(metadata)
+
+    if len(errors) == 0:
+        resp = make_response(metadata, 200)
+        resp.headers['Content-Type'] = 'text/xml'
+    else:
+        resp = make_response(', '.join(errors), 500)
+    return resp
+
+
 @app.route("/logout")
-@login_required
 def logout():
-    logout_user()
-    return redirect(url_for("main_page"))
-
-@app.route("/metadata/<idp_name>", methods=['GET'])
-def metadata(idp_name):
-    saml_client = saml_client_for(idp_name)
-    metadata = create_metadata_string(
-        __file__,
-        saml_client.config
+    """
+         Logout
+         Handle SLO ( SP -> IDP )
+     """
+    req = prepare_request(request)
+    idp = None
+    auth = init_saml_auth(req, idp)
+    name_id = None
+    session_index = None
+    if 'samlNameId' in session:
+        name_id = session['samlNameId']
+    if 'samlSessionIndex' in session:
+        session_index = session['samlSessionIndex']
+    else:
+        return redirect(url_for('login'))
+    return redirect(
+        auth.logout(
+            name_id=name_id,
+            session_index=session_index,
+        )
     )
-    return Response(metadata, mimetype='text/xml')
 
 
-@app.route('/img/<filename>',  methods=['GET'])
+@app.route("/sls")
+def sls_logout():
+    """
+        Logout
+        Handle SLS ( IDP -> SP )
+    """
+    req = prepare_request(request)
+    idp = session.get('idp')
+    auth = init_saml_auth(req, idp)
+    errors = []
+    not_auth_warn = False
+    success_slo = False
+    attributes = False
+    paint_logout = False
+    dscb = lambda: session.clear()
+    url = auth.process_slo(delete_session_cb=dscb)
+    errors = auth.get_errors()
+    redirect_to = '/'
+    if len(errors) == 0:
+        if url is not None:
+            redirect_to = url
+        else:
+            success_slo = True
+            logout_user()
+    return redirect(redirect_to)
+
+
+@app.route('/img/<filename>', methods=['GET'])
 def get_file_img(filename):
     return send_file("static/img/%s" % filename)
 
-@app.route('/img/idp-logos/<filename>', methods=['GET'])
-def get_file_img_logo(filename):
-    return send_file("static/img/idp-logos/%s" % filename)
-
-@app.route('/dev/<filename>', methods=['GET'])
-def get_file_dev(filename):
-    return send_file("static/dev/%s" % filename)
-
-@app.route('/src/data/<filename>', methods=['GET'])
-def get_file(filename):
-    return send_file("static/src/data/%s" % filename)
-
-def _get_config(f_name, f_type='yaml'):
-    """
-    Read server configuration from a json file
-    """
-    with open(f_name, 'r') as fp:
-        if f_type == 'yaml':
-            return yaml.load(fp)
-        elif f_type == 'json':
-            return json.loads(fp.read())
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-p', dest='path', help='Path to configuration file.', default='./config.yaml')
-    parser.add_argument('-ct', dest='configuration_type', help='Configuration type [yaml|json]', default='yaml')
-    args = parser.parse_args()
-    # Init server
-    config = _get_config(args.path, args.configuration_type)
-    port = int(config.get('port'))
-    if port == 5000:
-        app.debug = True
-    metadata_url_for[config.get('test_idp_name')] = config.get('test_idp_metadata_url')
-    app.run(host=config.get('host'), port=port, debug=config.get('debug'))
+    app.run(host='0.0.0.0', port=5000, debug=True)
