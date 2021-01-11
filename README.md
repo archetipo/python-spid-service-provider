@@ -5,7 +5,7 @@ and [pysaml2](https://github.com/rohe/pysaml2). Only for test purpose.
 
 # Requirements
 
-- [Python](https://www.python.org/) 3.6+
+- [Python](https://www.python.org/) 3.7+
 - [Virtualenv](https://virtualenv.pypa.io/en/latest/)
 - [pip](https://pip.pypa.io/en/stable/)
 

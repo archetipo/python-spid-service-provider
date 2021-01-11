@@ -2,18 +2,19 @@
   "strict": true,
   "debug": true,
   "sp": {
-    "entityId": "http://localhost:5000/metadata/",
-    "issuer": "http://localhost:5000/metadata/",
+      "entityId": "http://192.168.1.15:5000/metadata",
+    "issuer": "http://192.168.1.15:5000/metadata",
     "assertionConsumerService": {
-      "url": "http://localhost:5000/acs",
+      "url": "http://192.168.1.15:5000/acs",
       "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
     },
     "singleLogoutService": {
-      "url": "http://localhost:5000/sls",
+      "url": "http://192.168.1.15:5000/sls",
+      "respurl": "http://192.168.1.15:5000/sls",
       "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
     },
     "attributeConsumingService": {
-      "serviceName": "http://localhost:5000",
+      "serviceName": "http://192.168.1.15:5000",
       "serviceDescription": "Spid SP testenv",
       "requestedAttributes": [
         {

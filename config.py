@@ -72,13 +72,15 @@ class SpidConfig(object):
             "debug": "",
             "sp": {
                 "entityId": "",
-                "assertionConsumerService": {
+                "singleSignOnService": {
                     "url": "",
-                    "binding": ""
+                    "respurl": "",
+                    "binding": "",
                 },
                 "singleLogoutService": {
                     "url": "",
-                    "binding": ""
+                    "respurl": "",
+                    "binding": "",
                 },
                 "attributeConsumingService": {
                     "serviceName": "",
@@ -129,13 +131,68 @@ class SpidConfig(object):
                 ]
             },
             "contactPerson": {
-                "technical": {
-                    "givenName": "technical_name",
-                    "emailAddress": "technical@example.com"
+                "other": {
+                    "Extensions": {
+                        "IPACode": False,
+                        "VATNumber": False,
+                        "FiscalCode": False,
+                        "Exttype": [
+                            "Public",
+                            "Private"
+                        ]
+                    },
+                    "givenName": "",
+                    "emailAddress": "",
+                    "telephoneNumber": ""
                 },
-                "support": {
-                    "givenName": "support_name",
-                    "emailAddress": "support@example.com"
+                "billing": {
+                    "Extension_type": [],
+                    "Extensions": {
+                        "FpaExt": [
+                            "CessionarioCommittente"
+                        ],
+                        "CessionarioCommittente": {
+                            "DatiAnagrafici": {
+                                "IdFiscaleIVA": {
+                                    "IdPaese": "",
+                                    "IdCodice": ""
+                                },
+                                "Anagrafica": {
+                                    "Denominazione": ""
+                                }
+                            },
+                            "Sede": {
+                                "Indirizzo": "",
+                                "NumeroCivico": "",
+                                "CAP": "",
+                                "Comune": "",
+                                "Provincia": "",
+                                "Nazione": ""
+                            }
+                        },
+                        "TerzoIntermediarioSoggettoEmittente": {
+                            "DatiAnagrafici": {
+                                "IdFiscaleIVA": {
+                                    "IdPaese": "",
+                                    "IdCodice": ""
+                                },
+                                "Anagrafica": {
+                                    "Denominazione": ""
+                                }
+                            },
+                            "Sede": {
+                                "Indirizzo": "",
+                                "NumeroCivico": "",
+                                "CAP": "",
+                                "Comune": "",
+                                "Provincia": "",
+                                "Nazione": ""
+                            }
+                        }
+                    },
+                    "Company": "",
+                    "emailAddress": "",
+                    "telephoneNumber": ""
                 }
             },
             "organization": {

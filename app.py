@@ -29,7 +29,7 @@ from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
 from config import *
 
-from saml import get_saml_auth, prepare_request
+from spid_saml import get_saml_auth, prepare_request
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SPID_SP_PUBLIC_CERT = os.path.join(BASE_DIR, 'saml/certs/sp.crt')
@@ -55,6 +55,18 @@ ATTRIBUTES_MAP = {
     'familyName': 'last_name',
     'name': 'first_name'
 }
+
+
+# TODO
+# metadata
+# https://forum.italia.it/t/contactperson-extensions/18024/3
+# https://www.agid.gov.it/sites/default/files/repository_files/spid-avviso-n29v3-specifiche_sp_pubblici_e_privati.pdf
+# Gestire i metadati degli IDP :
+# https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml
+# Spid TEST Agid:
+# https://idptest.spid.gov.it/
+# IDP di validazione (https://validator.spid.gov.it)
+
 
 def init_saml_auth(request, idp):
     local_config = None
@@ -112,7 +124,7 @@ def user():
 
 @app.route("/")
 def main_page():
-    loginEp = "/login?idp=test"
+    loginEp = "/login"
     session['formActionUrl'] = loginEp
     return render_template('main_page.html', idp_dict=metadata_url_for)
 
@@ -123,20 +135,27 @@ def login():
         Handle login action ( SP -> IDP )
     """
     req = prepare_request(request)
-    if 'idp' in req['get_data']:
-        idp = req['get_data'].get('idp')
-        session['idp'] = idp
-        auth = init_saml_auth(req, idp)
-        args = []
-        if 'next' in req['get_data']:
-            args.append(req['get_data'].get('next'))
-        return redirect(auth.login(*args))
-    else:
-        return redirect("/")
+    print("")
+    print("req")
+    print(req)
+    print("")
+    print("")
+    print("")
+    idp = req['get_data'].get('idp') or "test"
+    session['idp'] = idp
+    auth = init_saml_auth(req, idp)
+    args = []
+    if 'next' in req['get_data']:
+        args.append(req['get_data'].get('next'))
+    return redirect(auth.login(*args))
+
 
 
 @app.route("/acs", methods=['POST'])
 def acs():
+    """
+        Handle login action ( IDP -> SP )
+    """
     req = prepare_request(request)
     # if "idp" in req.get('post_data'):
     idp = None

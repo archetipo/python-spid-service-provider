@@ -4,30 +4,36 @@
     "authnRequestsSigned": true,
     "logoutRequestSigned": true,
     "logoutResponseSigned": false,
-    "signMetadata": false,
+    "signMetadata": true,
     "wantMessagesSigned": false,
-    "wantAssertionsSigned": false,
+    "wantAssertionsSigned": true,
     "wantNameId": true,
     "wantNameIdEncrypted": false,
     "wantAssertionsEncrypted": false,
     "signatureAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-    "digestAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#sha256",
+    "digestAlgorithm": "http://www.w3.org/2001/04/xmlenc#sha256",
     "requestedAuthnContext": [
-      "https://www.spid.gov.it/SpidL2"
+      "https://www.spid.gov.it/SpidL3"
     ]
   },
   "contactPerson": {
-    "technical": {
-      "givenName": "technical_name",
-      "emailAddress": "technical@example.com"
-    },
-    "support": {
+    "other": {
+      "Extensions": {
+        "IPACode": "UFPQ1O",
+        "VATNumber": "",
+        "FiscalCode": "",
+        "Exttype": [
+          "Public",
+          "Private"
+        ]
+      },
       "givenName": "support_name",
-      "emailAddress": "support@example.com"
+      "emailAddress": "support@example.com",
+      "telephoneNumber": "011 1010100101010"
     }
   },
   "organization": {
-    "en-US": {
+    "it": {
       "name": "sp_test",
       "displayname": "SP test",
       "url": "http://sp.example.com"

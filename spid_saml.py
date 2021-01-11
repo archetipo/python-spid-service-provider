@@ -1,51 +1,20 @@
 # -*- coding: utf-8 -*-
+from os.path import dirname
+
 import xmlsec
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.authn_request import OneLogin_Saml2_Authn_Request
 from onelogin.saml2.errors import OneLogin_Saml2_ValidationError
 from onelogin.saml2.logout_response import OneLogin_Saml2_Logout_Response
-from onelogin.saml2.constants import OneLogin_Saml2_Constants
-from onelogin.saml2.metadata import OneLogin_Saml2_Metadata
+
 from onelogin.saml2.response import OneLogin_Saml2_Response
-from onelogin.saml2.utils import OneLogin_Saml2_Utils, OneLogin_Saml2_Error
 from onelogin.saml2.logout_request import OneLogin_Saml2_Logout_Request
-from onelogin.saml2.xml_templates import OneLogin_Saml2_Templates
-from onelogin.saml2.xml_utils import OneLogin_Saml2_XML
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 from config import *
-from onelogin.saml2 import compat
+
 from defusedxml.lxml import tostring
 from urllib.parse import urlparse
-
-OneLogin_Saml2_Templates.AUTHN_REQUEST = """
-<samlp:AuthnRequest
-        xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
-        xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="%(id)s"
-        Version="2.0"
-        IssueInstant="%(issue_instant)s" Destination="%(destination)s"
-        ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-        AssertionConsumerServiceURL="%(assertion_url)s"%(attr_consuming_service_str)s>
-<saml:Issuer NameQualifier="%(entity_id)s" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">%(entity_id)s</saml:Issuer>%(subject_str)s%(nameid_policy_str)s
-        %(requested_authn_context_str)s
-</samlp:AuthnRequest>"""
-
-OneLogin_Saml2_Templates.LOGOUT_REQUEST = """\
-<samlp:LogoutRequest
-  xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
-  xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
-  ID="%(id)s"
-  Version="2.0"
-  IssueInstant="%(issue_instant)s"
-  Destination="%(single_logout_url)s">
-  <saml:Issuer xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" NameQualifier="%(entity_id)s" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">%(entity_id)s</saml:Issuer>
-  <saml:NameID xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" NameQualifier="%(entity_id)s">%(entity_id)s</saml:NameID>  
-    %(session_index)s
-</samlp:LogoutRequest>"""
-
-
-class SpidOneLogin_Saml2_settings(OneLogin_Saml2_Settings):
-    def __init__(self, *args, **kwargs):
-        super(SpidOneLogin_Saml2_settings, self).__init__(*args, **kwargs)
+from spid_saml_setting import *
 
 
 class SpidSaml2LogoutResponse(OneLogin_Saml2_Logout_Response):
@@ -164,7 +133,7 @@ class Spid_OneLogin_Saml2_Authn_Request(OneLogin_Saml2_Authn_Request):
 
         attr_consuming_service_str = ''
         if 'attributeConsumingService' in sp_data and sp_data['attributeConsumingService']:
-            attr_consuming_service_str = "\n    AttributeConsumingServiceIndex=\"1\""
+            attr_consuming_service_str = "\n    AttributeConsumingServiceIndex=\"0\""
 
         request = OneLogin_Saml2_Templates.AUTHN_REQUEST % \
                   {
@@ -228,10 +197,10 @@ class SpidSaml2Auth(OneLogin_Saml2_Auth):
         :type custom_base_path: string
         """
         self.__request_data = request_data
-        if isinstance(old_settings, SpidOneLogin_Saml2_settings):
+        if isinstance(old_settings, SpidOneLogin_Saml2_Settings):
             self.__settings = old_settings
         else:
-            self.__settings = SpidOneLogin_Saml2_settings(old_settings, custom_base_path)
+            self.__settings = SpidOneLogin_Saml2_Settings(old_settings, custom_base_path)
         self.__attributes = dict()
         self.__nameid = None
         self.__nameid_format = None
@@ -335,15 +304,6 @@ class SpidSaml2Auth(OneLogin_Saml2_Auth):
         authn_request = Spid_OneLogin_Saml2_Authn_Request(
             self.__settings, force_authn, is_passive, set_nameid_policy,
             name_id_value_req)
-        print("")
-        print("authn_request")
-        print(authn_request)
-        print("")
-        print(dir(authn_request))
-        print("")
-        print("")
-        print(authn_request.get_xml())
-        print("")
         self.__last_request = authn_request.get_xml()
         self.__last_request_id = authn_request.get_id()
 
