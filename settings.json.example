@@ -1,0 +1,54 @@
+{
+  "strict": true,
+  "debug": true,
+  "sp": {
+    "entityId": "{base_url_sp}/metadata",
+    "issuer": "{base_url_sp}/metadata",
+    "assertionConsumerService": {
+      "url": "{base_url_sp}/acs",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+    },
+    "singleLogoutService": {
+      "url": "{base_url_sp}/sls",
+      "respurl": "{base_url_sp}/sls",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "attributeConsumingService": {
+      "serviceName": "{base_url_sp}",
+      "serviceDescription": "Spid SP testenv",
+      "requestedAttributes": [
+        {
+          "name": "name",
+          "isRequired": true
+        },
+        {
+          "name": "familyName",
+          "isRequired": true
+        },
+        {
+          "name": "email",
+          "isRequired": true
+        },
+        {
+          "name": "spidCode",
+          "isRequired": true
+        }
+      ]
+    },
+    "NameIDFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+    "x509cert": "",
+    "privateKey": ""
+  },
+  "idp": {
+    "entityId": "{base_url_ipd}",
+    "singleSignOnService": {
+      "url": "{base_url_ipd}/sso",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "singleLogoutService": {
+      "url": "{base_url_ipd}/slo",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "x509cert": "{cert_idp}"
+  }
+}

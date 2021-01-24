@@ -7,3 +7,5 @@ env/
 config.yaml
 sp.key
 sp.crt
+advanced_settings.json
+settings.json

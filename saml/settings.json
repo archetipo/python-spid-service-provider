@@ -2,7 +2,7 @@
   "strict": true,
   "debug": true,
   "sp": {
-      "entityId": "http://192.168.1.15:5000/metadata",
+    "entityId": "http://192.168.1.15:5000/metadata",
     "issuer": "http://192.168.1.15:5000/metadata",
     "assertionConsumerService": {
       "url": "http://192.168.1.15:5000/acs",
