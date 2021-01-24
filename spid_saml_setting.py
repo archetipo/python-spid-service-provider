@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# 2021 Alessio Gerace.
+#
+# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
+
 from onelogin.saml2.constants import OneLogin_Saml2_Constants
 from onelogin.saml2.xml_utils import OneLogin_Saml2_XML
 from onelogin.saml2.utils import OneLogin_Saml2_Utils, OneLogin_Saml2_Error

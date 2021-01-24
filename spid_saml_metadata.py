@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# 2021 Alessio Gerace.
+#
+# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
+
 from onelogin.saml2.metadata import OneLogin_Saml2_Metadata
 from time import gmtime, strftime, time
 from datetime import datetime

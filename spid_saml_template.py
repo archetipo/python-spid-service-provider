@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# 2021 Alessio Gerace.
+#
+# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
+
 from onelogin.saml2.xml_templates import OneLogin_Saml2_Templates
 
 OneLogin_Saml2_Templates.AUTHN_REQUEST = """

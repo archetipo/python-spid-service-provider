@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-from os.path import dirname
+# 2021 Alessio Gerace.
+#
+# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
+
 
 import xmlsec
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
@@ -253,12 +256,6 @@ class SpidSaml2Auth(OneLogin_Saml2_Auth):
             # AuthnResponse -- HTTP_POST Binding
             response = OneLogin_Saml2_Response(self.__settings, self.__request_data['post_data']['SAMLResponse'])
             self.__last_response = response.get_xml_document()
-            print("")
-            print("Reposnse")
-            print("")
-            # print(response.__last_response)
-            print("")
-            print("")
             if response.is_valid(self.__request_data, request_id):
                 self.__attributes = response.get_attributes()
                 self.__nameid = response.get_nameid()
@@ -632,7 +629,6 @@ class SpidSaml2Auth(OneLogin_Saml2_Auth):
             name_id_format=name_id_format,
             spnq=spnq
         )
-        print(logout_request.get_xml())
         self.__last_request = logout_request.get_xml()
         self.__last_request_id = logout_request.id
 
@@ -890,7 +886,6 @@ class SpidSaml2Auth(OneLogin_Saml2_Auth):
 
 
 def get_saml_auth(request, dp_id, local_config_path=None):
-    print("get_saml_auth", dp_id)
     cfg = {'request_data': request, 'old_settings': SpidConfig.get_saml_settings(
         idp_id=dp_id, local_config=local_config_path), 'custom_base_path': local_config_path}
 
