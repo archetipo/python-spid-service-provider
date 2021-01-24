@@ -49,6 +49,6 @@
       "url": "{base_url_ipd}/slo",
       "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
     },
-    "x509cert": "{cert_idp}"
+    "x509cert": "{x509_idp}"
   }
 }

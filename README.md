@@ -1,6 +1,6 @@
 # Introduction
 
-#### WIP
+#### WIP WIP 
 
 This is an example for italian Spid SAML Service Provider service written using [Flask](http://flask.pocoo.org/)
 and [pysaml2](https://github.com/rohe/pysaml2). Only for test purpose.
@@ -16,73 +16,73 @@ development libraries, which are needed by PySAML2.
 
 Instructions for installing these development libraries will differ depending on your host operating system.
 
-### Docker (consigliata)
+### Docker
 
-1. Clonare il repository in locale
+These instructions allow you to test this project with spid-testnv2 and create SP metadata
+that pass all check of spid saml check.
+
+1. Clone repo
 
    ```shell
    git clone https://github.com/archetipo/python-spid-service-provider.git
    ```
 
-1. Entrare nella directory
+1. go to folrder
 
    ```shell
    cd python-spid-service-provider
    ```
+1. make certs
+  
+   go to  saml/certs and type
+   
+    ```shell
+   $ openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -keyout sp.key -out sp.crt
+    ``` 
 
-1. Fare build dell'immagine
+1. make settings
+  
+   ``` shell
+   cp settings.json.example saml/settings.json
+   ```
+   
+   ``` shell
+   cp advanced_settings.json.example saml/advanced_settings.json
+   ```
+   
+   in settings.json type
+    
+   ```
+    base_url_sp = IP:5000 or host of this project
+    base_url_idp =  url where spid-testenv2 running
+    x509_idp = read this data from spid-testenv2 metadata 
+   ```
+
+    ```shell
+   $ openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -keyout sp.key -out sp.crt
+    ``` 
+    
+   in advanced_settings.json edit the `IPACode` this field is mandatory for spid saml check
+   
+
+
+1. build Docker image
 
    ```shell
    docker build -t italia/spid-sp-test .
    ```
 
-1. Lanciare il container:
+1. run container:
 
    ```shell
    docker run -p 5000:5000 italia/spid-sp-test
    ```
 
-## Mac OS X
+# Check with spid-saml-check
 
-```shell
-$ brew install libffi libxmlsec1
-```
+Follow the instructions for build and run [spid-saml-check] (https://github.com/italia/spid-saml-check)
 
-## Ubuntu
-
-```shell
-$ sudo apt install libffi-devel xmlsec1 xmlsec1-openssl
-```
-
-# Installation
-
-```shell
-$ virtualenv venv
-$ . venv/bin/activate
-$ pip install -r requirements.txt 
-```
-
-# Configuration
-
- ```shell
-$ openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -keyout sp.key -out sp.crt
- ``` 
-
- ```shell
-$ cp config.yaml.example config.yaml
- ```
-
-  ```shell
-$  '0.0.0.0 spid-sp-test' >> /etc/hosts
- ```
-
-# Running
-
- ```shell
-$ python app.py 
- ```
-
-# Testing
+# Testing with spid-testenv2
 
 The fastest way to test this example SAML SP is to use the [spid-testenv2](https://github.com/italia/spid-testenv2)
 service.
@@ -93,11 +93,6 @@ Here is how:
 
    [Configure and install spid-testenv2](https://github.com/italia/spid-testenv2#installazione)
 
-2. Start the example Spid Service Provider
-
-   ```shell
-   $ python app.py
-   ```
 
 # Contact
 
