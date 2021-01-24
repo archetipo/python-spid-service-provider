@@ -69,13 +69,13 @@ Spid Saml Check `https` check, pass only if you run this project under https url
 1. build Docker image
 
    ```shell
-   docker build -t italia/spid-sp-test .
+   docker build -t spid-sp-test .
    ```
 
 1. run container:
 
    ```shell
-   docker run -p 5000:5000 italia/spid-sp-test
+   docker run -p 5000:5000 spid-sp-test
    ```
 
 # Check with spid-saml-check

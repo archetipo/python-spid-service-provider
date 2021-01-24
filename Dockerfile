@@ -5,9 +5,13 @@ RUN apt-get update \
     && apt-get install -y \
         ca-certificates \
         xmlsec1 \
+        libxmlsec1-dev \
         libffi6 \
         build-essential \
         libpq-dev \
+        pkg-config \
+        make \
+        gcc \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -15,7 +19,8 @@ RUN apt-get update \
 # (avoid rebuilding the requirements layer when application changes)
 COPY ./requirements.txt /app/requirements.txt
 WORKDIR /app
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 
 # When started, the container checks for the required configuration files
 # and if it can't find them, it uses the example files to make the server

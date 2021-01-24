@@ -18,12 +18,12 @@ REQUESTED_ATTRIBUTES = ['name', 'familyName', 'email', 'spidCode']
 SAML_METADATA_NAMESPACE = "urn:oasis:names:tc:SAML:2.0:metadata"
 BINDING_REDIRECT_URN = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
 XML_SIGNATURE_NAMESPACE = "http://www.w3.org/2000/09/xmldsig#"
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = f"/app{os.path.dirname(os.getcwd())}"
 
 
 def get_idp_config(id, name=None):
     # xml_path = pkg_resources.resource_filename('spid-idp-metadata/spid-idp-%s.xml' % id)
-    xml_path = os.path.join(BASE_DIR, 'python-spid-service-provider/spid-idp-metadata/spid-idp-%s.xml' % id)
+    xml_path = os.path.join(BASE_DIR, 'spid-idp-metadata/spid-idp-%s.xml' % id)
     idp_metadata = et.parse(xml_path).getroot()
     sso_path = './/{%s}SingleSignOnService[@Binding="%s"]' % \
                (SAML_METADATA_NAMESPACE, BINDING_REDIRECT_URN)
