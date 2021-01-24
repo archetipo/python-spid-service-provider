@@ -2,24 +2,24 @@
 
 #### WIP WIP 
 
-This is an example for italian Spid SAML Service Provider service written using [Flask](http://flask.pocoo.org/)
-and [pysaml2](https://github.com/rohe/pysaml2). Only for test purpose.
+This is a minimalist example for italian Spid SAML Service Provider service written using [Flask](http://flask.pocoo.org/)
+and implementa a hard refactoring of [python3-saml](https://github.com/onelogin/python3-saml). Only for test purpose.
 
 # Requirements
 
-- [Python](https://www.python.org/) 3.7+
-- [Virtualenv](https://virtualenv.pypa.io/en/latest/)
-- [pip](https://pip.pypa.io/en/stable/)
+- [Docker](https://docs.docker.com/) 
 
 You will also need a development environment capable of compiling Python packages and the "libffi" and "libxmlsec1"
-development libraries, which are needed by PySAML2.
+development libraries, which are needed by python3-saml.
 
 Instructions for installing these development libraries will differ depending on your host operating system.
 
-### Docker
+### How to build and run with Docker
 
 These instructions allow you to test this project with spid-testnv2 and create SP metadata
-that pass all check of spid saml check.
+that pass all checks of spid saml check.
+
+Spid Saml Check `https` check, pass only if you run this project under https url.
 
 1. Clone repo
 
