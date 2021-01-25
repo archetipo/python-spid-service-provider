@@ -6,6 +6,8 @@ RUN apt-get update \
         ca-certificates \
         xmlsec1 \
         libxmlsec1-dev \
+        libxml2-dev \
+        libxmlsec1-openssl \
         libffi6 \
         build-essential \
         libpq-dev \
