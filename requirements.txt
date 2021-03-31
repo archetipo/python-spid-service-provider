@@ -21,7 +21,7 @@ idna==2.7                 # via cryptography, requests
 importlib-resources==1.0.1  # via -r requirements.in
 itsdangerous==1.1.0       # via flask
 jinja2==2.10.3            # via flask
-lxml==4.2.3               # via -r requirements.in, signxml
+lxml==4.6.3               # via -r requirements.in, signxml
 markupsafe==1.1.1         # via jinja2
 psycopg2==2.8.6           # via -r requirements.in
 pycparser==2.19           # via cffi
@@ -45,7 +45,7 @@ flask==1.0.2
 Flask-Bootstrap4==4.0.2
 Flask-Login==0.4.1
 importlib-resources==1.0.1
-lxml==4.2.3
+lxml==4.6.3
 pyyaml==5.1
 python-codicefiscale==0.3.5
 ujson==4.0.1
